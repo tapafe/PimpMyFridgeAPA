@@ -11,19 +11,15 @@
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
-// Connect pin 1 (on the left) of the sensor to +5V
-// NOTE: If using a board with 3.3V logic like an Arduino Due connect pin 1
-// to 3.3V instead of 5V!
-// Connect pin 2 of the sensor to whatever your DHTPIN is
-// Connect pin 4 (on the right) of the sensor to GROUND
-// Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
 
-// Initialize DHT sensor.
-// Note that older versions of this library took an optional third parameter to
-// tweak the timings for faster processors.  This parameter is no longer needed
-// as the current DHT reading algorithm adjusts itself to work on faster procs.
 DHT dht(DHTPIN, DHTTYPE);
 
+//wanted temperature
+int temp_want=30; // clesius
+
+
+//pin MOSFET
+int pinMosfet=7;
 
 //begin PT100 conf
 int valeur; //valeur retournée par la thermistance 
@@ -36,13 +32,13 @@ float resistance; //resistance de la thermistance
 void setup() {
   Serial.begin(9600);
   //Serial.println("DHTxx test!");
-
+  pinMode(pinMosfet,OUTPUT);
   dht.begin();
 }
 
 void loop() {
-  // Wait a few seconds between measurements.
-  delay(2000);
+  
+  delay(350);
 
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -69,14 +65,17 @@ void loop() {
   //
 
 
+
+
   //PT100 calcul
  valeur=analogRead(0);
  resistance=(float)(1023-valeur)*R1/valeur; //calcul de la resistance de la thermistance 
  temperature=1/(log(resistance/R1)/B+1/298.15)-273.15; //calcul de la température en kelvin puis convertie en °C
   //
 
-  
-
+  float interval_temp = temp_want*0.03; // we want +/- 3%
+  float temp_want_plus=temp_want+interval_temp;
+  float temp_want_minus=temp_want-interval_temp;
 
 
 
@@ -94,4 +93,21 @@ void loop() {
   //Serial.print(" °C ");
   //Serial.print("point de rosé ");
   Serial.println(rose);
+
+  if (temperature>temp_want_plus)
+    {
+        //action when temperature is too hot
+                Serial.print("too hot");
+                digitalWrite(pinMosfet,LOW); //le moteur se lance
+    }
+
+  if (temperature<=temp_want_plus)
+    {
+        //action when temperature is correct or coldest
+               
+                Serial.print("corect or less ");
+                digitalWrite(pinMosfet,HIGH); //le moteur se coupe
+    }
+  
+  
 }
