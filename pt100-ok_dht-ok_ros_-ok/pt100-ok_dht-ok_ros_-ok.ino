@@ -34,6 +34,7 @@ void setup() {
   //Serial.println("DHTxx test!");
   pinMode(pinMosfet,OUTPUT);
   dht.begin();
+  pinMode(8,OUTPUT);
 }
 
 void loop() {
@@ -97,8 +98,9 @@ void loop() {
   if (t>temp_want_plus)
     {
         //action when temperature is too hot
-                Serial.print("too hot");
+                
                 digitalWrite(pinMosfet,LOW); //le moteur se lance
+                digitalWrite(8,HIGH); //le moteur se lance
     }
 
   if (t<=temp_want_plus)
