@@ -37,6 +37,18 @@ void setup() {
   pinMode(8,OUTPUT);
 }
 
+double Thermister(int RawADC) {
+  double Temp;
+    Temp = log(((10240000/RawADC) - 10000));
+  Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));
+  Temp = Temp - 273.15;           // Convert Kelvin to Celcius
+  //Serial.println(Temp);
+ return Temp;
+}
+
+  
+
+
 void loop() {
   
   delay(350);
@@ -86,6 +98,9 @@ void loop() {
   //Serial.print(" %\t");
   //Serial.print("Temperature interne: ");
   Serial.print(t);
+  Serial.print(" ");
+  //Serial.print("Temperature interne plaque: ");
+  Serial.print(Thermister(analogRead(1)));
   Serial.print(" ");
   //Serial.print(" °C ");
   //Serial.print("Temperature externe: ");

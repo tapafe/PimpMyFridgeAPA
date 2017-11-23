@@ -15,7 +15,7 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 //wanted temperature
-int temp_want=30; // clesius
+int temp_want=18; // celsius
 
 
 //pin MOSFET
@@ -37,9 +37,21 @@ void setup() {
   pinMode(8,OUTPUT);
 }
 
+double Thermister(int RawADC) {
+  double Temp;
+    Temp = log(((10240000/RawADC) - 10000));
+  Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));
+  Temp = Temp - 273.15;           // Convert Kelvin to Celcius
+  //Serial.println(Temp);
+ return Temp;
+}
+
+  
+
+
 void loop() {
   
-  delay(350);
+  delay(1000);
 
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -87,6 +99,9 @@ void loop() {
   //Serial.print("Temperature interne: ");
   Serial.print(t);
   Serial.print(" ");
+  //Serial.print("Temperature interne plaque: ");
+  Serial.print(Thermister(analogRead(1)));
+  Serial.print(" ");
   //Serial.print(" °C ");
   //Serial.print("Temperature externe: ");
   Serial.print(temperature);
@@ -94,13 +109,14 @@ void loop() {
   //Serial.print(" °C ");
   //Serial.print("point de rosé ");
   Serial.println(rose);
+  
 
   if (t>temp_want_plus)
     {
         //action when temperature is too hot
                 
                 digitalWrite(pinMosfet,LOW); //le moteur se lance
-                digitalWrite(8,HIGH); //le moteur se lance
+               digitalWrite(8,HIGH); //la led se lance
     }
 
   if (t<=temp_want_plus)
@@ -109,7 +125,21 @@ void loop() {
                
                 
                 digitalWrite(pinMosfet,HIGH); //le moteur se coupe
+                digitalWrite(8,LOW); //la led se coupe
     }
+
+
+//control by serial.read
+
+     if (Serial.available() > 0) {
+     
+      
+                // read the incoming byte:
+               int incomingByte = Serial.parseInt();
+               temp_want=incomingByte;
+               
+                        }
+  //temporaire a supprimer , pour test
   
-  
+  //fin du temporaire
 }
